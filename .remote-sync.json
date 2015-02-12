@@ -1,0 +1,12 @@
+{
+  "uploadOnSave": true,
+  "hostname": "pegasus.cs.iupui.edu",
+  "port": "22",
+  "target": "/home/trbrazel/python/kMeansAlgo",
+  "ignore": [
+    ".git/**"
+  ],
+  "username": "trbrazel",
+  "password": "David!Seanne!Katie!Taylor",
+  "transport": "scp"
+}
