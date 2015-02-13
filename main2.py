@@ -8,6 +8,7 @@ import sys
 import random
 import timeit
 import csv
+import copy
 
 ##Custom Variables
 data = []
@@ -75,29 +76,43 @@ def kMeans():
     #print len(data)
     #print len(clusterAssignment)
 
-    while(keepGoing):
+    while(clustersChanged):
         count += 1
-        #print count
-        oldCentroids = centroids
+        print "Count:" + str(count)
+        oldCentroids = copy.deepcopy(centroids)
 
         #Associate each point to a cluster.
         clusterPoints()
 
+        #print oldCentroids
+        #print centroids
         #Calculate new centroids.
         recalculateCentroids()
+        print oldCentroids
+        print centroids
 
         #stop the loop
         if count == 7:
             keepGoing = False
 
-        #if np.array_equal(np.array(oldCentroids, float), np.array(centroids, float)):
-            #clustersChanged = False
+        #flag
+        flag = 0
 
-        #for id, centroid in enumerate(centroids):
-        #    if np.array_equal(np.array(oldCentroids[id], float), np.array(centroid, float)):
-        #        num += 1
-        #if num == len(centroids):
-        #    clustersChanged = True
+        #print oldCentroids
+        #print centroids
+
+        #Check if the centroids have converged.
+        for index, oldCentroid in enumerate(oldCentroids):
+            dis = distanceBetweenPoints(oldCentroid, centroids[index])
+            #print dis
+            if dis <= 0.0001:
+                flag += 1
+
+        #print "flag : " + str(flag)
+        #print "len : " + str(len(centroids))
+        if flag == len(centroids):
+            #All clusters were not changed.
+            clustersChanged = False
 
     #return count
 
@@ -136,7 +151,6 @@ def recalculateCentroids():
     #Loop through each cluster.
         #calculate mean of all the points in the cluster.
         #that will be your new centroid for that cluster.
-    oldCentroids = centroids
     for id, centroid in enumerate(centroids):
         sum_of_points = None
         amount_of_points = 0
@@ -160,10 +174,6 @@ def recalculateCentroids():
         #print "New:"
         #print newCentroid
         centroids[id] = newCentroid
-
-    #if np.array_equal(np.array(oldCentroids[0], float), np.array(centroids[0], float)):
-        #print "The clusters have stopped changing"
-        #clustersChanged = False
 
 def printResults(time):
     global count
@@ -224,7 +234,7 @@ if __name__ == "__main__":
     #Input's:
     ## Argument 1 -- path to data file.
     ## Argument 2 -- number of clusters.
-    print "length: " + str(len(sys.argv))
+    #print "length: " + str(len(sys.argv))
     print str(sys.argv)
     if len(sys.argv) >= 2:
         fileName = sys.argv[1]
