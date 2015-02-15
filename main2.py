@@ -47,7 +47,7 @@ def loadInitCentroidsFromFile(fn):
     for lin in s:
         if lin != None:
             print str(lin.strip())
-            centroids.append(data[int(lin.strip())])
+            centroids.append(data[int(lin.strip()) - 1])
     print centroids
     #for centroid in centroids:
     #    for cent in centroid:
@@ -104,7 +104,7 @@ def kMeans():
         #Check if the centroids have converged.
         for index, oldCentroid in enumerate(oldCentroids):
             dis = distanceBetweenPoints(oldCentroid, centroids[index])
-            #print dis
+            #Check if centroid was less than or equal to .00001 distance wise away from inital point.
             if dis <= 0.0001:
                 flag += 1
 
