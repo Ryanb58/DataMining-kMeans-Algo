@@ -46,17 +46,13 @@ def loadInitCentroidsFromFile(fn):
     s = f.readlines()
     for lin in s:
         if lin != None:
-            print str(lin.strip())
+            #print str(lin.strip())
             centroids.append(data[int(lin.strip()) - 1])
-    print centroids
-    #for centroid in centroids:
-    #    for cent in centroid:
-    #        print cent
     for centroid in centroids:
-        print centroid
+        #print centroid
         map(float, (x for x in centroid))
 
-    print centroids
+    #print centroids
 
 def kMeans():
 
@@ -77,29 +73,20 @@ def kMeans():
     #print len(clusterAssignment)
 
     while(clustersChanged):
+        #Increase iteration count.
         count += 1
-        print "Count:" + str(count)
+
+        #Make a copy of old centroids.
         oldCentroids = copy.deepcopy(centroids)
 
         #Associate each point to a cluster.
         clusterPoints()
 
-        #print oldCentroids
-        #print centroids
         #Calculate new centroids.
         recalculateCentroids()
-        print oldCentroids
-        print centroids
 
-        #stop the loop
-        if count == 7:
-            keepGoing = False
-
-        #flag
+        #flag for convergence.
         flag = 0
-
-        #print oldCentroids
-        #print centroids
 
         #Check if the centroids have converged.
         for index, oldCentroid in enumerate(oldCentroids):
@@ -108,8 +95,7 @@ def kMeans():
             if dis <= 0.0001:
                 flag += 1
 
-        #print "flag : " + str(flag)
-        #print "len : " + str(len(centroids))
+        #Check if the flags are equal to the amount of centroids.
         if flag == len(centroids):
             #All clusters were not changed.
             clustersChanged = False
@@ -184,16 +170,18 @@ def recalculateCentroids():
 
 def printResults(time):
     global count
+    print "------------------------------------------"
     print "# of data points: " + str(len(data))
     print "Dimensions: " + str(dimensionsOfData())
     print "Value of k: " + str(k)
     print "Iterations: " + str(count)
     print "Clock time: " + str(time)
-    print "Final Mean: "
     print "SSE Score: " + str(sse())
-    print "Final Cluster Assignment: " + str(centroids)
+    print "Final Cluster Assignment: "
+    for index, point in enumerate(clusterAssignment):
+        print str(index) + ") " + str(point)
     print "Cluster Size: " + str(clusterSizes())
-
+    print "------------------------------------------"
 
 ## Helper Functions ##
 
@@ -258,8 +246,7 @@ if __name__ == "__main__":
     #Input's:
     ## Argument 1 -- path to data file.
     ## Argument 2 -- number of clusters.
-    #print "length: " + str(len(sys.argv))
-    print str(sys.argv)
+
     if len(sys.argv) >= 2:
         fileName = sys.argv[1]
     else:
