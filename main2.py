@@ -133,6 +133,10 @@ def initCentroids():
 
 #Assign each point to a cluster.
 def clusterPoints():
+
+    #Clear the clusterAssignment array before re-adding new cluster arrangements.
+    del clusterAssignment[:]
+
     #Loop through each point
     for id, point in enumerate(data):
 
@@ -146,6 +150,9 @@ def clusterPoints():
 
         #get the minimum distance between a point and centroid, Assign the point to that centroid.
         clusterAssignment.insert(id, distances.index(min(distances)))
+
+    #print "Amount of points: " + str(len(data))
+    #print "Amount of assignments: " + str(len(clusterAssignment))
 
 def recalculateCentroids():
     #Loop through each cluster.
@@ -185,10 +192,21 @@ def printResults(time):
     print "Final Mean: "
     print "SSE Score: " + str(sse())
     print "Final Cluster Assignment: " + str(centroids)
-    print "Cluster Size: "
+    print "Cluster Size: " + str(clusterSizes())
 
 
 ## Helper Functions ##
+
+#Calculate the amount of points in each cluster.
+def clusterSizes():
+    sizes = [0 for centroid in centroids]
+    print "Amount of points: " + str(len(data))
+    print "Amount of assignments: " + str(len(clusterAssignment))
+    for index, centroid in enumerate(centroids):
+        for id, point in enumerate(clusterAssignment):
+            if point == index:
+                sizes[index] += 1
+    return sizes
 
 #Euclidean distance for points.
 def distanceBetweenPoints(point, centroid):
