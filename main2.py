@@ -9,6 +9,7 @@ import random
 import timeit
 import csv
 import copy
+import getopt
 
 ##Custom Variables
 data = []
@@ -16,7 +17,8 @@ centroids = []
 clusterAssignment = []
 count = 0
 clustersChanged = True
-initCents = None
+centroidFile = None
+labelFile = None
 
 
 ## FUNCTIONS ##
@@ -56,10 +58,10 @@ def loadInitCentroidsFromFile(fn):
 
 def kMeans():
 
-    if initCents == None:
+    if centroidFile == None:
         initCentroids()
     else:
-        loadInitCentroidsFromFile(initCents)
+        loadInitCentroidsFromFile(centroidFile)
 
     keepGoing = True
 
@@ -244,23 +246,18 @@ def sse():
 if __name__ == "__main__":
 
     #Input's:
-    ## Argument 1 -- path to data file.
-    ## Argument 2 -- number of clusters.
+    optlist, args = getopt.getopt(sys.argv[1:], 'd:k:c:l:')
+    for o, a in optlist:
+        if o == "-d":
+            fileName = a
+        elif o == "-k":
+            k = a
+        elif o == "-c":
+            centroidFile = a
+        elif o == "-l":
+            labelFile = a
 
-    if len(sys.argv) >= 2:
-        fileName = sys.argv[1]
-    else:
-        print "Missing first argument."
-
-    if len(sys.argv) >= 3:
-        k = sys.argv[2]
-    else:
-        print "Missing second argument."
-
-    if len(sys.argv) >= 4:
-        initCents = sys.argv[3]
-
-    #print(file)
+    #Load data -> Run kMeans -> Print Results.
     if fileName != None and k != None:
         loadDataFromFile(fileName)
         t = timeit.Timer(lambda: kMeans())
