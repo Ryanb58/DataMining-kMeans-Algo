@@ -249,6 +249,10 @@ def sse():
 
     return sse
 
+#Get the purity score for each cluster.
+def purityScores():
+    pass
+
 if __name__ == "__main__":
 
     #Input's:
