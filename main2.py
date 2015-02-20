@@ -200,12 +200,18 @@ def printResults(time):
 #Calculate the amount of points in each cluster.
 def clusterSizes():
     sizes = [0 for centroid in centroids]
-    print "Amount of points: " + str(len(data))
-    print "Amount of assignments: " + str(len(clusterAssignment))
+
+    #Loop through each centroid.
     for index, centroid in enumerate(centroids):
+
+        #Loop through each points assignment.
         for id, point in enumerate(clusterAssignment):
+
+            #If this point belong to this cluster, then increase size count for that cluster.
             if point == index:
                 sizes[index] += 1
+
+    #Pass back the array of sizes.
     return sizes
 
 #Euclidean distance for points.
