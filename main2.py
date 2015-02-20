@@ -11,14 +11,25 @@ import csv
 import copy
 import getopt
 
-##Custom Variables
+
+
+#Points
 data = []
+#Centroids
 centroids = []
+#Point to Centroid Assignments(Clusters)
 clusterAssignment = []
+
+#Iteration Count
 count = 0
+
+#Loop Boolean
 clustersChanged = True
+
+#FileNames
 centroidFile = None
 labelFile = None
+
 
 
 ## FUNCTIONS ##
@@ -113,11 +124,6 @@ def initCentroids():
             #print(i)
             newpoint.append(float(i))
         centroids.append(newpoint)
-
-    #DEBUG: Print the initiallized centroids.
-    #print "Centroids:"
-    #print centroids
-    #print centroids[0][0]
 
 #Assign each point to a cluster.
 def clusterPoints():
