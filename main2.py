@@ -50,11 +50,6 @@ def loadDataFromFile(fn):
         for cellId, item in enumerate(row):
             data[rowId][cellId] = convertStringToFloat(data[rowId][cellId])
 
-    #DEBUG: Print out data array.
-    #print data
-    #for rowId, row in enumerate(data):
-    #    for cellId, item in enumerate(row):
-    #        print str(data[rowId][cellId])
 
 def loadInitCentroidsFromFile(fn):
     f = open(fn, "r")
@@ -67,13 +62,13 @@ def loadInitCentroidsFromFile(fn):
         #print centroid
         map(float, (x for x in centroid))
 
+
 def loadLabelsFromFile(fn):
     f = open(fn, "r")
     s = f.readlines()
     for lin in s:
         labels.append(str(lin).strip())
-    print labels
-    print len(labels)
+
 
 def kMeans():
 
@@ -201,23 +196,6 @@ def printResults(time):
 
 ## Helper Functions ##
 
-#Calculate the amount of points in each cluster.
-def clusterSizes():
-    sizes = [0 for centroid in centroids]
-
-    #Loop through each centroid.
-    for index, centroid in enumerate(centroids):
-
-        #Loop through each points assignment.
-        for id, point in enumerate(clusterAssignment):
-
-            #If this point belong to this cluster, then increase size count for that cluster.
-            if point == index:
-                sizes[index] += 1
-
-    #Pass back the array of sizes.
-    return sizes
-
 #Euclidean distance for points.
 def distanceBetweenPoints(point, centroid):
     dis = []
@@ -243,6 +221,7 @@ def convertStringToFloat(num):
         pass
     return num
 
+
 def sse():
     sse = []
     #Loop through each centroid.
@@ -257,9 +236,49 @@ def sse():
 
     return sse
 
+
+#Calculate the amount of points in each cluster.
+def clusterSizes():
+    sizes = [0 for centroid in centroids]
+
+    #Loop through each centroid.
+    for index, centroid in enumerate(centroids):
+
+        #Loop through each points assignment.
+        for id, point in enumerate(clusterAssignment):
+
+            #If this point belong to this cluster, then increase size count for that cluster.
+            if point == index:
+                sizes[index] += 1
+
+    #Pass back the array of sizes.
+    return sizes
+
+def getIndexesOfPointsInCluster(id):
+    indexes = []
+    for index, point in enumerate(clusterAssignment):
+        if point == id:
+            indexes.append(index)
+    return indexes
+
+
 #Get the purity score for each cluster.
 def purityScores():
-    pass
+    maxValues = [0 for centroid in centroids]
+    for index, centroid in enumerate(centroids):
+        uniqueLabelCount = [0 for label in set(labels)]
+        for indOfPoint in getIndexesOfPointsInCluster(index):
+            for id, label in enumerate(set(labels)):
+                if list(set(labels))[id] == labels[indOfPoint]:
+                    uniqueLabelCount[id] += 1
+        print "C" + str(index) + ": " + str(uniqueLabelCount)
+        maxValues[index] = max(uniqueLabelCount)
+    print "Max Value: " + str(maxValues)
+    s = 0
+    for num in maxValues:
+        s += num
+    print str((1.0 / len(data)) * s)
+
 
 if __name__ == "__main__":
 
@@ -282,3 +301,5 @@ if __name__ == "__main__":
         t = timeit.Timer(lambda: kMeans())
         time = t.timeit(number=1)
         printResults(time)
+
+        purityScores()
