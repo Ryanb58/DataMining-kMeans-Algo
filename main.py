@@ -1,61 +1,81 @@
 # kMeans Cluster Algorithm
 # By: Taylor Brazelton
-
+#
 
 #IMPORTS
 import numpy as np
 import sys
 import random
 import timeit
+import csv
+import copy
+import getopt
 
-##Custom Variables
 
-#points
+
+#Points
 data = []
-#indexes of centroids
+#Centroids
 centroids = []
-#index of clusters
+#Point to Centroid Assignments(Clusters)
 clusterAssignment = []
+#Labels
+labels = []
 
+#Iteration Count
 count = 0
 
+#Loop Boolean
 clustersChanged = True
 
-initCents = None
+#FileNames
+centroidFile = None
+labelFile = None
+
 
 
 ## FUNCTIONS ##
 
 def loadDataFromFile(fn):
-    f = open(fn, "r")
-    s = f.readlines()
-    for line in s:
-        data.append(line.strip().split(","))
-    f.close()
+
+    #Load file into data array.
+    with open(fn, "rb") as f:
+        csvFile = csv.reader(f)
+        for line in csvFile:
+            data.append(line)
+        f.close()
+
+    #convert data array to integers
+    for rowId, row in enumerate(data):
+        for cellId, item in enumerate(row):
+            data[rowId][cellId] = convertStringToFloat(data[rowId][cellId])
+
 
 def loadInitCentroidsFromFile(fn):
     f = open(fn, "r")
     s = f.readlines()
     for lin in s:
         if lin != None:
-            print str(lin.strip())
-            centroids.append(data[int(lin.strip())])
-    print centroids
-    #for centroid in centroids:
-    #    for cent in centroid:
-    #        print cent
+            #print str(lin.strip())
+            centroids.append(data[int(lin.strip()) - 1])
     for centroid in centroids:
-        print centroid
+        #print centroid
         map(float, (x for x in centroid))
 
-    print centroids
+
+def loadLabelsFromFile(fn):
+    f = open(fn, "r")
+    s = f.readlines()
+    for lin in s:
+        labels.append(str(lin).strip())
+
 
 def kMeans():
 
-    if initCents == None:
+    if centroidFile == None:
         initCentroids()
     else:
-        loadInitCentroidsFromFile(initCents)
+        loadInitCentroidsFromFile(centroidFile)
 
     keepGoing = True
 
@@ -68,10 +88,12 @@ def kMeans():
     #print len(data)
     #print len(clusterAssignment)
 
-    while(keepGoing):
+    while(clustersChanged):
+        #Increase iteration count.
         count += 1
-        #print count
-        oldCentroids = centroids
+
+        #Make a copy of old centroids.
+        oldCentroids = copy.deepcopy(centroids)
 
         #Associate each point to a cluster.
         clusterPoints()
@@ -79,18 +101,20 @@ def kMeans():
         #Calculate new centroids.
         recalculateCentroids()
 
-        #stop the loop
-        if count == 7:
-            keepGoing = False
+        #flag for convergence.
+        flag = 0
 
-        #if np.array_equal(np.array(oldCentroids, float), np.array(centroids, float)):
-            #clustersChanged = False
+        #Check if the centroids have converged.
+        for index, oldCentroid in enumerate(oldCentroids):
+            dis = distanceBetweenPoints(oldCentroid, centroids[index])
+            #Check if centroid was less than or equal to .00001 distance wise away from inital point.
+            if dis <= 0.0001:
+                flag += 1
 
-        #for id, centroid in enumerate(centroids):
-        #    if np.array_equal(np.array(oldCentroids[id], float), np.array(centroid, float)):
-        #        num += 1
-        #if num == len(centroids):
-        #    clustersChanged = True
+        #Check if the flags are equal to the amount of centroids.
+        if flag == len(centroids):
+            #All clusters were not changed.
+            clustersChanged = False
 
     #return count
 
@@ -104,13 +128,12 @@ def initCentroids():
             newpoint.append(float(i))
         centroids.append(newpoint)
 
-    #DEBUG: Print the initiallized centroids.
-    #print "Centroids:"
-    #print centroids
-    #print centroids[0][0]
-
 #Assign each point to a cluster.
 def clusterPoints():
+
+    #Clear the clusterAssignment array before re-adding new cluster arrangements.
+    del clusterAssignment[:]
+
     #Loop through each point
     for id, point in enumerate(data):
 
@@ -125,11 +148,13 @@ def clusterPoints():
         #get the minimum distance between a point and centroid, Assign the point to that centroid.
         clusterAssignment.insert(id, distances.index(min(distances)))
 
+    #print "Amount of points: " + str(len(data))
+    #print "Amount of assignments: " + str(len(clusterAssignment))
+
 def recalculateCentroids():
     #Loop through each cluster.
         #calculate mean of all the points in the cluster.
         #that will be your new centroid for that cluster.
-    oldCentroids = centroids
     for id, centroid in enumerate(centroids):
         sum_of_points = None
         amount_of_points = 0
@@ -154,22 +179,20 @@ def recalculateCentroids():
         #print newCentroid
         centroids[id] = newCentroid
 
-    #if np.array_equal(np.array(oldCentroids[0], float), np.array(centroids[0], float)):
-        #print "The clusters have stopped changing"
-        #clustersChanged = False
-
 def printResults(time):
     global count
+    print "------------------------------------------"
     print "# of data points: " + str(len(data))
     print "Dimensions: " + str(dimensionsOfData())
     print "Value of k: " + str(k)
     print "Iterations: " + str(count)
     print "Clock time: " + str(time)
-    print "Final Mean: "
     print "SSE Score: " + str(sse())
     print "Final Cluster Assignment: "
-    print "Cluster Size: "
-
+    for index, point in enumerate(clusterAssignment):
+        print str(index) + ") " + str(point)
+    print "Cluster Size: " + str(clusterSizes())
+    print "------------------------------------------"
 
 ## Helper Functions ##
 
@@ -191,6 +214,14 @@ def distanceBetweenPoints(point, centroid):
 def dimensionsOfData():
     return len(data[0])
 
+def convertStringToFloat(num):
+    try:
+        num = float(num)
+    except ValueError:
+        pass
+    return num
+
+
 def sse():
     sse = []
     #Loop through each centroid.
@@ -205,29 +236,70 @@ def sse():
 
     return sse
 
+
+#Calculate the amount of points in each cluster.
+def clusterSizes():
+    sizes = [0 for centroid in centroids]
+
+    #Loop through each centroid.
+    for index, centroid in enumerate(centroids):
+
+        #Loop through each points assignment.
+        for id, point in enumerate(clusterAssignment):
+
+            #If this point belong to this cluster, then increase size count for that cluster.
+            if point == index:
+                sizes[index] += 1
+
+    #Pass back the array of sizes.
+    return sizes
+
+def getIndexesOfPointsInCluster(id):
+    indexes = []
+    for index, point in enumerate(clusterAssignment):
+        if point == id:
+            indexes.append(index)
+    return indexes
+
+
+#Get the purity score for each cluster.
+def purityScores():
+    maxValues = [0 for centroid in centroids]
+    for index, centroid in enumerate(centroids):
+        uniqueLabelCount = [0 for label in set(labels)]
+        for indOfPoint in getIndexesOfPointsInCluster(index):
+            for id, label in enumerate(set(labels)):
+                if list(set(labels))[id] == labels[indOfPoint]:
+                    uniqueLabelCount[id] += 1
+        print "C" + str(index) + ": " + str(uniqueLabelCount)
+        maxValues[index] = max(uniqueLabelCount)
+    print "Max Value: " + str(maxValues)
+    s = 0
+    for num in maxValues:
+        s += num
+    print str((1.0 / len(data)) * s)
+
+
 if __name__ == "__main__":
 
     #Input's:
-    ## Argument 1 -- path to data file.
-    ## Argument 2 -- number of clusters.
-    print "length: " + str(len(sys.argv))
-    print str(sys.argv)
-    if len(sys.argv) >= 2:
-        fileName = sys.argv[1]
-    else:
-        print "Missing first argument."
+    optlist, args = getopt.getopt(sys.argv[1:], 'd:k:c:l:')
+    for o, a in optlist:
+        if o == "-d":
+            fileName = a
+            loadDataFromFile(fileName)
+        elif o == "-k":
+            k = a
+        elif o == "-c":
+            centroidFile = a
+        elif o == "-l":
+            labelFile = a
+            loadLabelsFromFile(labelFile)
 
-    if len(sys.argv) >= 3:
-        k = sys.argv[2]
-    else:
-        print "Missing second argument."
-
-    if len(sys.argv) >= 4:
-        initCents = sys.argv[3]
-
-    #print(file)
+    #Load data -> Run kMeans -> Print Results.
     if fileName != None and k != None:
-        loadDataFromFile(fileName)
         t = timeit.Timer(lambda: kMeans())
         time = t.timeit(number=1)
         printResults(time)
+
+        purityScores()
