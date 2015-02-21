@@ -19,6 +19,8 @@ data = []
 centroids = []
 #Point to Centroid Assignments(Clusters)
 clusterAssignment = []
+#Labels
+labels = []
 
 #Iteration Count
 count = 0
@@ -65,7 +67,13 @@ def loadInitCentroidsFromFile(fn):
         #print centroid
         map(float, (x for x in centroid))
 
-    #print centroids
+def loadLabelsFromFile(fn):
+    f = open(fn, "r")
+    s = f.readlines()
+    for lin in s:
+        labels.append(str(lin).strip())
+    print labels
+    print len(labels)
 
 def kMeans():
 
@@ -260,16 +268,17 @@ if __name__ == "__main__":
     for o, a in optlist:
         if o == "-d":
             fileName = a
+            loadDataFromFile(fileName)
         elif o == "-k":
             k = a
         elif o == "-c":
             centroidFile = a
         elif o == "-l":
             labelFile = a
+            loadLabelsFromFile(labelFile)
 
     #Load data -> Run kMeans -> Print Results.
     if fileName != None and k != None:
-        loadDataFromFile(fileName)
         t = timeit.Timer(lambda: kMeans())
         time = t.timeit(number=1)
         printResults(time)
