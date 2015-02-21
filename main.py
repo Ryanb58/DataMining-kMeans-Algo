@@ -12,7 +12,8 @@ import copy
 import getopt
 
 
-
+#Amount of centroids
+k = 0
 #Points
 data = []
 #Centroids
@@ -52,9 +53,12 @@ def loadDataFromFile(fn):
 
 
 def loadInitCentroidsFromFile(fn):
+    global k
+
     f = open(fn, "r")
     s = f.readlines()
     for lin in s:
+        k += 1
         if lin != None:
             #print str(lin.strip())
             centroids.append(data[int(lin.strip()) - 1])
@@ -297,9 +301,9 @@ if __name__ == "__main__":
             loadLabelsFromFile(labelFile)
 
     #Load data -> Run kMeans -> Print Results.
-    if fileName != None and k != None:
+    if (fileName != None and k != None) or (fileName != None and centroidFile != None):
         t = timeit.Timer(lambda: kMeans())
         time = t.timeit(number=1)
         printResults(time)
-
-        purityScores()
+        if (labelFile != None):
+            purityScores()
